@@ -1,0 +1,20 @@
+{
+  "name": "pet-ahfu-app",
+  "version": "1.0.0",
+  "main": "App.js",
+  "scripts": {
+    "start": "npx expo start",
+    "android": "npx expo start --android",
+    "ios": "npx expo start --ios",
+    "web": "npx expo start --web"
+  },
+  "dependencies": {
+    "@expo/metro-runtime": "^56.0.15",
+    "expo": "^56.0.12",
+    "expo-dev-client": "~56.0.20",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "react-native": "^0.86.0",
+    "react-native-web": "^0.21.2"
+  }
+}
