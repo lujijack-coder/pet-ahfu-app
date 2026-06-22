@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="宠安·阿福">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%234CAF50'/><text x='50' y='68' text-anchor='middle' font-size='60'>🐱</text></svg>">
+<title>宠安·阿福</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--green:#4CAF50;--green-light:#E8F5E9;--orange:#FF7043;--blue:#42A5F5;--blue-light:#E3F2FD;--purple:#7E57C2;--purple-light:#EDE7F6;--pink:#EC407A;--gold:#FFB300;--bg:#F5F6FA;--card:#fff;--text:#333;--text-light:#999;--safe-bottom:env(safe-area-inset-bottom,16px)}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);overflow:hidden;height:100vh;display:flex;flex-direction:column}
+.header{background:var(--green);padding:14px 20px 14px;padding-top:max(14px,env(safe-area-inset-top,14px));color:#fff;text-align:center}
+.header h1{font-size:20px;font-weight:700}
+.header p{font-size:12px;opacity:.8;margin-top:2px}
+.pages{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.page{display:none;padding:0 16px 20px}
+.page.active{display:block}
+.tab-bar{display:flex;background:var(--card);border-top:1px solid #eee;padding-bottom:var(--safe-bottom)}
+.tab{flex:1;text-align:center;padding:10px 0 6px;font-size:11px;color:var(--text-light);cursor:pointer;border:none;background:none}
+.tab.active{color:var(--green)}
+.tab .icon{font-size:22px;display:block;margin-bottom:2px}
+
+/* 宠物卡片 */
+.pet-card{background:var(--card);border-radius:16px;padding:20px;display:flex;align-items:center;margin-top:16px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.pet-avatar{width:64px;height:64px;border-radius:32px;background:var(--green-light);display:flex;align-items:center;justify-content:center;font-size:36px;margin-right:16px;flex-shrink:0}
+.pet-name{font-size:20px;font-weight:700}
+.pet-breed{font-size:13px;color:var(--text-light);margin:4px 0 8px}
+.health-tag{display:inline-block;background:var(--green-light);color:var(--green);padding:4px 12px;border-radius:12px;font-size:12px;font-weight:600}
+
+/* 快捷数据 */
+.stats{display:flex;gap:8px;margin:16px 0 20px}
+.stat{flex:1;background:var(--card);border-radius:12px;padding:12px 6px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.stat .icon{font-size:20px;margin-bottom:4px}
+.stat .value{font-size:14px;font-weight:700}
+.stat .label{font-size:11px;color:var(--text-light);margin-top:2px}
+
+/* 菜单 */
+.section-title{font-size:16px;font-weight:700;margin:4px 0 12px}
+.menu-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px}
+.menu-card{border-radius:14px;padding:20px;text-align:center;cursor:pointer;border:none;font-size:15px;font-weight:600;display:flex;flex-direction:column;align-items:center}
+.menu-card .icon{font-size:32px;margin-bottom:8px}
+
+/* 贴士 */
+.tip-card{background:var(--card);border-radius:14px;padding:16px;display:flex;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.tip-emoji{font-size:28px;margin-right:12px;flex-shrink:0}
+.tip-title{font-size:15px;font-weight:700;margin-bottom:4px}
+.tip-text{font-size:13px;color:var(--text-light);line-height:1.6}
+
+/* AI */
+.ai-input{width:100%;background:var(--bg);border:none;border-radius:10px;padding:14px;font-size:15px;min-height:100px;resize:none;margin-bottom:12px;font-family:inherit}
+.ai-btn{width:100%;background:var(--blue);color:#fff;border:none;border-radius:10px;padding:14px;font-size:16px;font-weight:700;cursor:pointer}
+.ai-answer{background:var(--blue-light);border-radius:14px;padding:16px;margin-top:16px}
+.ai-disclaimer{font-size:11px;color:var(--text-light);margin-top:10px;font-style:italic}
+
+/* 医院 */
+.hosp-card{background:var(--card);border-radius:14px;padding:16px;display:flex;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.hosp-left{flex:1}
+.hosp-name{font-size:16px;font-weight:700}
+.hosp-addr{font-size:13px;color:var(--text-light);margin:4px 0}
+.hosp-dist{font-size:12px;color:var(--blue)}
+.hosp-right{display:flex;flex-direction:column;align-items:flex-end;justify-content:center}
+.hosp-rating{color:var(--gold);font-weight:600;font-size:14px;margin-bottom:8px}
+.hosp-btn{background:var(--green);color:#fff;border:none;padding:6px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer}
+
+/* 档案 */
+.profile-card{background:var(--card);border-radius:14px;padding:20px;margin-bottom:20px;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.profile-row{display:flex;margin-bottom:10px}
+.profile-item{flex:1}
+.profile-item .label{font-size:12px;color:var(--text-light)}
+.profile-item .value{font-size:15px;font-weight:600;margin-top:2px}
+.record-card{background:var(--card);border-radius:12px;padding:14px;display:flex;align-items:flex-start;margin-bottom:8px;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.record-dot{width:10px;height:10px;border-radius:5px;background:var(--green);margin-top:5px;margin-right:12px;flex-shrink:0}
+.record-content{flex:1}
+.record-header{display:flex;justify-content:space-between;margin-bottom:4px}
+.record-title{font-size:15px;font-weight:600}
+.record-date{font-size:12px;color:var(--text-light)}
+.record-desc{font-size:13px;color:var(--text-light)}
+.record-tag{padding:3px 10px;border-radius:8px;font-size:11px;font-weight:600;flex-shrink:0;margin-left:8px}
+.tag-green{background:var(--green-light);color:var(--green)}
+.tag-blue{background:var(--blue-light);color:var(--blue)}
+
+.back-btn{display:inline-block;margin:12px 0 8px;color:var(--green);font-weight:600;font-size:15px;cursor:pointer;border:none;background:none}
+.page-title{font-size:22px;font-weight:700;margin-bottom:4px}
+.page-sub{font-size:14px;color:var(--text-light);margin-bottom:20px}
+</style>
+</head>
+<body>
+
+<div class="header"><h1>宠安·阿福</h1><p>AI宠物健康管家</p></div>
+
+<div class="pages">
+  <!-- 首页 -->
+  <div class="page active" id="home">
+    <div class="pet-card">
+      <div class="pet-avatar">🐱</div>
+      <div>
+        <div class="pet-name">豆包</div>
+        <div class="pet-breed">英短 · 3岁 · ♂</div>
+        <span class="health-tag">健康评分 92</span>
+      </div>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="icon">⚖️</div><div class="value">4.8kg</div><div class="label">体重</div></div>
+      <div class="stat"><div class="icon">🌡️</div><div class="value">38.2°</div><div class="label">体温</div></div>
+      <div class="stat"><div class="icon">❤️</div><div class="value">120</div><div class="label">心率</div></div>
+      <div class="stat"><div class="icon">🏃</div><div class="value">8,230</div><div class="label">步数</div></div>
+    </div>
+    <div class="section-title">常用功能</div>
+    <div class="menu-grid">
+      <button class="menu-card" style="background:#E3F2FD;color:#42A5F5" onclick="showPage('ai')"><span class="icon">🤖</span>AI问诊</button>
+      <button class="menu-card" style="background:#E8F5E9;color:#4CAF50" onclick="showPage('hospital')"><span class="icon">🏥</span>附近医院</button>
+      <button class="menu-card" style="background:#FCE4EC;color:#EC407A" onclick="alert('药房功能开发中')"><span class="icon">💊</span>在线药房</button>
+      <button class="menu-card" style="background:#EDE7F6;color:#7E57C2" onclick="alert('疫苗提醒功能开发中')"><span class="icon">📅</span>疫苗提醒</button>
+      <button class="menu-card" style="background:#E8F5E9;color:#4CAF50" onclick="alert('饮食建议功能开发中')"><span class="icon">🍽️</span>饮食建议</button>
+      <button class="menu-card" style="background:#E3F2FD;color:#42A5F5" onclick="showPage('profile')"><span class="icon">📋</span>健康档案</button>
+    </div>
+    <div class="section-title">每日健康贴士</div>
+    <div class="tip-card">
+      <div class="tip-emoji">💡</div>
+      <div>
+        <div class="tip-title">夏季宠物防暑指南</div>
+        <div class="tip-text">避免正午遛狗，备足饮水，不要将宠物单独留在车内。短鼻犬种（法斗、巴哥）尤其需要注意防暑降温。</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI问诊 -->
+  <div class="page" id="ai">
+    <button class="back-btn" onclick="showPage('home')">← 返回</button>
+    <div class="page-title">🤖 AI宠物医生</div>
+    <div class="page-sub">描述宠物症状，AI帮你初步分析</div>
+    <textarea class="ai-input" id="aiQuestion" placeholder="例如：我家猫这两天不怎么吃东西，还总是打喷嚏..."></textarea>
+    <button class="ai-btn" onclick="askAI()">开始问诊</button>
+    <div class="ai-answer" id="aiAnswer" style="display:none">
+      <div style="font-size:24px;margin-bottom:8px">🩺</div>
+      <div id="aiAnswerText" style="font-size:14px;line-height:1.8;color:var(--text)"></div>
+      <div class="ai-disclaimer">⚠️ AI分析仅供参考，紧急情况请立即就医</div>
+    </div>
+  </div>
+
+  <!-- 找医院 -->
+  <div class="page" id="hospital">
+    <button class="back-btn" onclick="showPage('home')">← 返回</button>
+    <div class="page-title">🏥 附近宠物医院</div>
+    <div class="page-sub">北京 · 已接入28家直赔医院</div>
+    <div class="hosp-card">
+      <div class="hosp-left"><div class="hosp-name">宠爱国际动物医院</div><div class="hosp-addr">朝阳区望京街道</div><div class="hosp-dist">📍 1.2km</div></div>
+      <div class="hosp-right"><div class="hosp-rating">⭐ 4.8</div><button class="hosp-btn">导航</button></div>
+    </div>
+    <div class="hosp-card">
+      <div class="hosp-left"><div class="hosp-name">瑞鹏宠物医院</div><div class="hosp-addr">海淀区中关村</div><div class="hosp-dist">📍 2.5km</div></div>
+      <div class="hosp-right"><div class="hosp-rating">⭐ 4.6</div><button class="hosp-btn">导航</button></div>
+    </div>
+    <div class="hosp-card">
+      <div class="hosp-left"><div class="hosp-name">芭比堂动物医院</div><div class="hosp-addr">西城区金融街</div><div class="hosp-dist">📍 3.1km</div></div>
+      <div class="hosp-right"><div class="hosp-rating">⭐ 4.7</div><button class="hosp-btn">导航</button></div>
+    </div>
+  </div>
+
+  <!-- 健康档案 -->
+  <div class="page" id="profile">
+    <button class="back-btn" onclick="showPage('home')">← 返回</button>
+    <div class="page-title">📋 健康档案</div>
+    <div class="profile-card">
+      <div class="pet-name" style="margin-bottom:14px">豆包</div>
+      <div class="profile-row"><div class="profile-item"><div class="label">品种</div><div class="value">英短</div></div><div class="profile-item"><div class="label">年龄</div><div class="value">3岁</div></div><div class="profile-item"><div class="label">性别</div><div class="value">公 ♂</div></div></div>
+      <div class="profile-row"><div class="profile-item"><div class="label">体重</div><div class="value">4.8kg</div></div><div class="profile-item"><div class="label">血型</div><div class="value">A型</div></div><div class="profile-item"><div class="label">芯片</div><div class="value">已植入</div></div></div>
+    </div>
+    <div class="section-title">医疗记录</div>
+    <div class="record-card"><div class="record-dot"></div><div class="record-content"><div class="record-header"><div class="record-title">年度体检</div><div class="record-date">2026-06-15</div></div><div class="record-desc">全部指标正常，体重略增</div></div><span class="record-tag tag-green">正常</span></div>
+    <div class="record-card"><div class="record-dot"></div><div class="record-content"><div class="record-header"><div class="record-title">狂犬疫苗</div><div class="record-date">2026-04-02</div></div><div class="record-desc">第三针，有效期至2027年</div></div><span class="record-tag tag-blue">已完成</span></div>
+    <div class="record-card"><div class="record-dot"></div><div class="record-content"><div class="record-header"><div class="record-title">体外驱虫</div><div class="record-date">2025-12-10</div></div><div class="record-desc">福来恩滴剂</div></div><span class="record-tag tag-blue">已完成</span></div>
+  </div>
+</div>
+
+<div class="tab-bar">
+  <button class="tab active" onclick="showPage('home')"><span class="icon">🏠</span>首页</button>
+  <button class="tab" onclick="showPage('ai')"><span class="icon">🤖</span>AI问诊</button>
+  <button class="tab" onclick="showPage('hospital')"><span class="icon">🏥</span>找医院</button>
+  <button class="tab" onclick="showPage('profile')"><span class="icon">📋</span>档案</button>
+</div>
+
+<script>
+function showPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById(name).classList.add('active');
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab')[{'home':0,'ai':1,'hospital':2,'profile':3}[name]].classList.add('active');
+}
+function askAI(){
+  var q=document.getElementById('aiQuestion').value.trim();
+  if(!q)return;
+  var answers=[
+    '狗狗偶尔打喷嚏是正常的，但如果频繁打喷嚏并伴有鼻涕，可能是感冒或过敏。建议观察24小时，如果症状加重请及时就医。',
+    '猫咪每天睡12-16个小时是正常的，这是它们的天性。只要食欲和精神状态正常，不用担心。',
+    '建议每月做一次体外驱虫，每3个月做一次体内驱虫。定期驱虫对宠物健康非常重要。',
+    '宠物每年应该做一次全面体检，包括血常规、生化、B超等。7岁以上的老年宠物建议每半年一次。',
+    '呕吐如果只是偶尔一次且精神状态好，可能是吃太快或毛球问题。但如果频繁呕吐、精神萎靡，建议立即就医。',
+    '拉稀可能是饮食变化、寄生虫或感染引起的。可以先禁食12小时，喂适量益生菌。没有好转的话尽快去医院。'
+  ];
+  document.getElementById('aiAnswerText').textContent=answers[Math.floor(Math.random()*answers.length)];
+  document.getElementById('aiAnswer').style.display='block';
+}
+</script>
+</body>
+</html>
