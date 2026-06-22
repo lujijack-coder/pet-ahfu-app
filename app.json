@@ -23,8 +23,9 @@
     },
     "extra": {
       "eas": {
-        "projectId": "YOUR_PROJECT_ID"
+        "projectId": "29255aed-4817-4228-807a-4f3b14e1c9b3"
       }
-    }
+    },
+    "owner": "lujijack"
   }
 }
