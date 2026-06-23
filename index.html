@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="宠安·阿福">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%234CAF50'/><text x='50' y='68' text-anchor='middle' font-size='60'>🐱</text></svg>">
+<title>宠安·阿福</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--green:#4CAF50;--green-light:#E8F5E9;--orange:#FF7043;--blue:#42A5F5;--blue-light:#E3F2FD;--purple:#7E57C2;--purple-light:#EDE7F6;--pink:#EC407A;--gold:#FFB300;--bg:#F5F6FA;--card:#fff;--text:#333;--text-light:#999;--safe-bottom:env(safe-area-inset-bottom,16px)}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);overflow:hidden;height:100vh;display:flex;flex-direction:column}
+.header{background:var(--green);padding:14px 20px 14px;padding-top:max(14px,env(safe-area-inset-top,14px));color:#fff;text-align:center;display:flex;justify-content:space-between;align-items:center}
+.header h1{font-size:20px;font-weight:700}
+.header .logout{background:rgba(255,255,255,.2);color:#fff;border:none;padding:6px 14px;border-radius:8px;font-size:13px;cursor:pointer}
+.pages{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.page{display:none;padding:0 16px 20px}
+.page.active{display:block}
+.tab-bar{display:flex;background:var(--card);border-top:1px solid #eee;padding-bottom:var(--safe-bottom)}
+.tab{flex:1;text-align:center;padding:10px 0 6px;font-size:11px;color:var(--text-light);cursor:pointer;border:none;background:none}
+.tab.active{color:var(--green)}
+.tab .icon{font-size:22px;display:block;margin-bottom:2px}
+
+/* 登录 */
+.login-box{background:var(--card);border-radius:16px;padding:30px 24px;margin:40px auto;max-width:360px;box-shadow:0 2px 12px rgba(0,0,0,.08);text-align:center}
+.login-box h2{font-size:24px;margin-bottom:6px}
+.login-box .sub{font-size:14px;color:var(--text-light);margin-bottom:24px}
+.login-box input{width:100%;border:1px solid #ddd;border-radius:10px;padding:14px;font-size:15px;margin-bottom:12px;font-family:inherit}
+.login-box button{width:100%;background:var(--green);color:#fff;border:none;border-radius:10px;padding:14px;font-size:16px;font-weight:700;cursor:pointer;margin-top:8px}
+.login-box .switch{font-size:13px;color:var(--blue);margin-top:16px;cursor:pointer;background:none;border:none}
+
+/* 宠物卡片 */
+.pet-card{background:var(--card);border-radius:16px;padding:20px;display:flex;align-items:center;margin-top:16px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.pet-avatar{width:64px;height:64px;border-radius:32px;background:var(--green-light);display:flex;align-items:center;justify-content:center;font-size:36px;margin-right:16px;flex-shrink:0}
+.pet-name{font-size:20px;font-weight:700}
+.pet-breed{font-size:13px;color:var(--text-light);margin:4px 0 8px}
+.health-tag{display:inline-block;background:var(--green-light);color:var(--green);padding:4px 12px;border-radius:12px;font-size:12px;font-weight:600}
+
+/* 快捷数据 */
+.stats{display:flex;gap:8px;margin:16px 0 20px}
+.stat{flex:1;background:var(--card);border-radius:12px;padding:12px 6px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.stat .icon{font-size:20px;margin-bottom:4px}
+.stat .value{font-size:14px;font-weight:700}
+.stat .label{font-size:11px;color:var(--text-light);margin-top:2px}
+
+/* 菜单 */
+.section-title{font-size:16px;font-weight:700;margin:4px 0 12px}
+.menu-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px}
+.menu-card{border-radius:14px;padding:20px;text-align:center;cursor:pointer;border:none;font-size:15px;font-weight:600;display:flex;flex-direction:column;align-items:center}
+.menu-card .icon{font-size:32px;margin-bottom:8px}
+
+/* 贴士 */
+.tip-card{background:var(--card);border-radius:14px;padding:16px;display:flex;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.tip-emoji{font-size:28px;margin-right:12px;flex-shrink:0}
+.tip-title{font-size:15px;font-weight:700;margin-bottom:4px}
+.tip-text{font-size:13px;color:var(--text-light);line-height:1.6}
+
+/* AI */
+.ai-input{width:100%;background:var(--bg);border:none;border-radius:10px;padding:14px;font-size:15px;min-height:100px;resize:none;margin-bottom:12px;font-family:inherit}
+.ai-btn{width:100%;background:var(--blue);color:#fff;border:none;border-radius:10px;padding:14px;font-size:16px;font-weight:700;cursor:pointer}
+.ai-btn:disabled{opacity:.6}
+.ai-answer{background:var(--blue-light);border-radius:14px;padding:16px;margin-top:16px}
+.ai-disclaimer{font-size:11px;color:var(--text-light);margin-top:10px;font-style:italic}
+.ai-loading{text-align:center;padding:20px;color:var(--text-light)}
+
+/* 医院 */
+.hosp-card{background:var(--card);border-radius:14px;padding:16px;display:flex;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.hosp-left{flex:1}
+.hosp-name{font-size:16px;font-weight:700}
+.hosp-addr{font-size:13px;color:var(--text-light);margin:4px 0}
+.hosp-dist{font-size:12px;color:var(--blue)}
+.hosp-right{display:flex;flex-direction:column;align-items:flex-end;justify-content:center}
+.hosp-rating{color:var(--gold);font-weight:600;font-size:14px;margin-bottom:8px}
+.hosp-btn{background:var(--green);color:#fff;border:none;padding:6px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer}
+
+/* 档案 */
+.profile-card{background:var(--card);border-radius:14px;padding:20px;margin-bottom:20px;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.profile-row{display:flex;margin-bottom:10px}
+.profile-item{flex:1}
+.profile-item .label{font-size:12px;color:var(--text-light)}
+.profile-item .value{font-size:15px;font-weight:600;margin-top:2px}
+.record-card{background:var(--card);border-radius:12px;padding:14px;display:flex;align-items:flex-start;margin-bottom:8px;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.record-dot{width:10px;height:10px;border-radius:5px;background:var(--green);margin-top:5px;margin-right:12px;flex-shrink:0}
+.record-content{flex:1}
+.record-header{display:flex;justify-content:space-between;margin-bottom:4px}
+.record-title{font-size:15px;font-weight:600}
+.record-date{font-size:12px;color:var(--text-light)}
+.record-desc{font-size:13px;color:var(--text-light)}
+.record-tag{padding:3px 10px;border-radius:8px;font-size:11px;font-weight:600;flex-shrink:0;margin-left:8px}
+.tag-green{background:var(--green-light);color:var(--green)}
+.tag-blue{background:var(--blue-light);color:var(--blue)}
+
+.back-btn{display:inline-block;margin:12px 0 8px;color:var(--green);font-weight:600;font-size:15px;cursor:pointer;border:none;background:none}
+.page-title{font-size:22px;font-weight:700;margin-bottom:4px}
+.page-sub{font-size:14px;color:var(--text-light);margin-bottom:20px}
+
+/* 宠物选择器 */
+.pet-selector{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.pet-chip{background:var(--bg);border:2px solid transparent;border-radius:20px;padding:8px 16px;font-size:14px;cursor:pointer}
+.pet-chip.selected{border-color:var(--green);background:var(--green-light)}
+
+.empty-state{text-align:center;padding:40px;color:var(--text-light);font-size:15px}
+</style>
+</head>
+<body>
+
+<!-- 登录/注册页 -->
+<div class="page active" id="loginPage" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;background:var(--bg)">
+  <div class="login-box">
+    <div style="font-size:60px;margin-bottom:12px">🐱</div>
+    <h2>宠安·阿福</h2>
+    <div class="sub">AI宠物健康管家</div>
+    <input type="text" id="phone" placeholder="手机号" maxlength="11">
+    <input type="text" id="nickname" placeholder="昵称" style="display:none">
+    <input type="password" id="password" placeholder="密码">
+    <button id="loginBtn" onclick="handleLogin()">登录</button>
+    <div class="switch" id="switchBtn" onclick="toggleMode()">没有账号？立即注册</div>
+    <div id="loginError" style="color:var(--orange);font-size:13px;margin-top:10px;display:none"></div>
+  </div>
+</div>
+
+<!-- 主界面 -->
+<div id="mainApp" style="display:none;height:100vh;flex-direction:column">
+<div class="header">
+  <div></div>
+  <h1>宠安·阿福</h1>
+  <button class="logout" onclick="logout()">退出</button>
+</div>
+
+<div class="pages">
+  <!-- 首页 -->
+  <div class="page active" id="home">
+    <div class="pet-card" id="homePetCard">
+      <div class="pet-avatar">🐱</div>
+      <div>
+        <div class="pet-name" id="homePetName">豆包</div>
+        <div class="pet-breed" id="homePetBreed">金毛 · 公</div>
+        <span class="health-tag" id="homeHealthTag">健康评分 92</span>
+      </div>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="icon">⚖️</div><div class="value" id="homeWeight">-</div><div class="label">体重(kg)</div></div>
+      <div class="stat"><div class="icon">🐶</div><div class="value" id="homeSpecies">-</div><div class="label">种类</div></div>
+      <div class="stat"><div class="icon">🎂</div><div class="value" id="homeAge">-</div><div class="label">年龄</div></div>
+      <div class="stat"><div class="icon">📋</div><div class="value" id="homeRecords">0</div><div class="label">档案</div></div>
+    </div>
+    <div class="section-title">常用功能</div>
+    <div class="menu-grid">
+      <button class="menu-card" style="background:#E3F2FD;color:#42A5F5" onclick="showPage('ai')"><span class="icon">🤖</span>AI问诊</button>
+      <button class="menu-card" style="background:#E8F5E9;color:#4CAF50" onclick="showPage('hospital')"><span class="icon">🏥</span>找医院</button>
+      <button class="menu-card" style="background:#FCE4EC;color:#EC407A" onclick="showPage('consultations')"><span class="icon">📝</span>问诊记录</button>
+      <button class="menu-card" style="background:#EDE7F6;color:#7E57C2" onclick="showPage('profile')"><span class="icon">📋</span>健康档案</button>
+    </div>
+    <div class="section-title">每日健康贴士</div>
+    <div class="tip-card">
+      <div class="tip-emoji">💡</div>
+      <div>
+        <div class="tip-title">夏季宠物防暑指南</div>
+        <div class="tip-text">避免正午遛狗，备足饮水，不要将宠物单独留在车内。短鼻犬种（法斗、巴哥）尤其需要注意防暑降温。</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI问诊 -->
+  <div class="page" id="ai">
+    <button class="back-btn" onclick="showPage('home')">← 返回</button>
+    <div class="page-title">🤖 AI宠物医生</div>
+    <div class="page-sub">描述宠物症状，AI帮你初步分析</div>
+    <div class="pet-selector" id="petSelector"></div>
+    <textarea class="ai-input" id="aiQuestion" placeholder="例如：我家猫这两天不怎么吃东西，还总是打喷嚏..."></textarea>
+    <button class="ai-btn" id="aiBtn" onclick="askAI()">开始问诊</button>
+    <div id="aiLoading" style="display:none" class="ai-loading">🐾 AI正在分析中...</div>
+    <div class="ai-answer" id="aiAnswer" style="display:none">
+      <div style="font-size:24px;margin-bottom:8px">🩺</div>
+      <div id="aiAnswerText" style="font-size:14px;line-height:1.8;color:var(--text)"></div>
+      <div class="ai-disclaimer">⚠️ AI分析仅供参考，紧急情况请立即就医</div>
+    </div>
+  </div>
+
+  <!-- 问诊记录 -->
+  <div class="page" id="consultations">
+    <button class="back-btn" onclick="showPage('home')">← 返回</button>
+    <div class="page-title">📝 问诊记录</div>
+    <div class="page-sub">历史问诊回顾</div>
+    <div id="consultationList"></div>
+  </div>
+
+  <!-- 找医院 -->
+  <div class="page" id="hospital">
+    <button class="back-btn" onclick="showPage('home')">← 返回</button>
+    <div class="page-title">🏥 附近宠物医院</div>
+    <div class="page-sub" id="hospitalCount">加载中...</div>
+    <div id="hospitalList"></div>
+  </div>
+
+  <!-- 健康档案 -->
+  <div class="page" id="profile">
+    <button class="back-btn" onclick="showPage('home')">← 返回</button>
+    <div class="page-title">📋 健康档案</div>
+    <div class="pet-selector" id="profilePetSelector" style="margin-bottom:16px"></div>
+    <div id="profileContent"></div>
+  </div>
+</div>
+
+<div class="tab-bar">
+  <button class="tab active" onclick="showPage('home')"><span class="icon">🏠</span>首页</button>
+  <button class="tab" onclick="showPage('ai')"><span class="icon">🤖</span>AI问诊</button>
+  <button class="tab" onclick="showPage('hospital')"><span class="icon">🏥</span>找医院</button>
+  <button class="tab" onclick="showPage('profile')"><span class="icon">📋</span>档案</button>
+</div>
+</div>
+
+<script>
+// ============ 配置 ============
+const API_BASE = 'http://localhost:8000';
+let token = localStorage.getItem('ahfu_token') || '';
+let user = null;
+let pets = [];
+let selectedPetId = null;
+let isRegister = false;
+
+// ============ 工具函数 ============
+function api(path, options = {}) {
+  const headers = { 'Content-Type': 'application/json', ...options.headers };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  return fetch(API_BASE + path, { ...options, headers }).then(r => r.json());
+}
+
+function showPage(name) {
+  document.querySelectorAll('#mainApp .page').forEach(p => p.classList.remove('active'));
+  const el = document.getElementById(name);
+  if (el) el.classList.add('active');
+  const tabs = document.querySelectorAll('.tab');
+  const map = { home: 0, ai: 1, hospital: 2, profile: 3, consultations: 1 };
+  tabs.forEach(t => t.classList.remove('active'));
+  if (map[name] !== undefined) tabs[map[name]].classList.add('active');
+  if (name === 'ai') loadPetsForSelector('petSelector');
+  if (name === 'consultations') loadConsultations();
+  if (name === 'hospital') loadHospitals();
+  if (name === 'profile') loadPetsForSelector('profilePetSelector');
+  if (name === 'home') loadHomeData();
+}
+
+function showLoginError(msg) {
+  const el = document.getElementById('loginError');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+// ============ 登录/注册 ============
+function toggleMode() {
+  isRegister = !isRegister;
+  document.getElementById('nickname').style.display = isRegister ? 'block' : 'none';
+  document.getElementById('loginBtn').textContent = isRegister ? '注册' : '登录';
+  document.getElementById('switchBtn').textContent = isRegister ? '已有账号？去登录' : '没有账号？立即注册';
+  document.getElementById('loginError').style.display = 'none';
+}
+
+async function handleLogin() {
+  const phone = document.getElementById('phone').value.trim();
+  const password = document.getElementById('password').value.trim();
+  const nickname = document.getElementById('nickname').value.trim();
+  if (!phone || !password) { showLoginError('请填写手机号和密码'); return; }
+  if (isRegister && !nickname) { showLoginError('请填写昵称'); return; }
+
+  try {
+    const endpoint = isRegister ? '/api/auth/register' : '/api/auth/login';
+    const body = isRegister ? { phone, password, nickname } : { phone, password };
+    const res = await api(endpoint, { method: 'POST', body: JSON.stringify(body) });
+    if (res.token) {
+      token = res.token;
+      user = res.user;
+      localStorage.setItem('ahfu_token', token);
+      document.getElementById('loginPage').style.display = 'none';
+      document.getElementById('mainApp').style.display = 'flex';
+      await loadPets();
+      await loadHomeData();
+    } else {
+      showLoginError(res.detail || '操作失败');
+    }
+  } catch (e) {
+    showLoginError('网络错误，请检查后端服务是否启动');
+  }
+}
+
+function logout() {
+  token = '';
+  user = null;
+  pets = [];
+  localStorage.removeItem('ahfu_token');
+  document.getElementById('loginPage').style.display = 'flex';
+  document.getElementById('mainApp').style.display = 'none';
+  document.getElementById('phone').value = '';
+  document.getElementById('password').value = '';
+}
+
+// ============ 宠物管理 ============
+async function loadPets() {
+  if (!token) return;
+  try {
+    const res = await api('/api/pets');
+    if (Array.isArray(res)) {
+      pets = res;
+      if (pets.length > 0 && !selectedPetId) selectedPetId = pets[0].id;
+    }
+  } catch (e) { console.error('loadPets error', e); }
+}
+
+function loadPetsForSelector(containerId) {
+  const container = document.getElementById(containerId);
+  if (pets.length === 0) {
+    container.innerHTML = '<div style="font-size:13px;color:var(--text-light);margin-bottom:12px">暂无宠物，请先添加宠物</div>';
+    return;
+  }
+  container.innerHTML = pets.map(p =>
+    `<span class="pet-chip ${p.id === selectedPetId ? 'selected' : ''}" onclick="selectPet(${p.id}, '${containerId}')">${p.name} (${p.breed || p.species})</span>`
+  ).join('');
+}
+
+function selectPet(id, containerId) {
+  selectedPetId = id;
+  loadPetsForSelector(containerId);
+}
+
+async function loadHomeData() {
+  if (pets.length === 0) {
+    document.getElementById('homePetName').textContent = '添加你的宠物';
+    document.getElementById('homePetBreed').textContent = '点击AI问诊开始';
+    return;
+  }
+  const pet = pets.find(p => p.id === selectedPetId) || pets[0];
+  document.getElementById('homePetName').textContent = pet.name;
+  document.getElementById('homePetBreed').textContent = `${pet.breed || pet.species} · ${pet.gender || ''}`;
+  document.getElementById('homeWeight').textContent = pet.weight || '-';
+  document.getElementById('homeSpecies').textContent = pet.species || '-';
+  // 计算年龄
+  if (pet.birth_date) {
+    const age = new Date().getFullYear() - new Date(pet.birth_date).getFullYear();
+    document.getElementById('homeAge').textContent = age + '岁';
+  }
+  // 加载档案数
+  try {
+    const records = await api(`/api/pets/${pet.id}/records`);
+    document.getElementById('homeRecords').textContent = Array.isArray(records) ? records.length : 0;
+  } catch (e) {}
+}
+
+// ============ AI 问诊 ============
+async function askAI() {
+  const q = document.getElementById('aiQuestion').value.trim();
+  if (!q) return;
+  const btn = document.getElementById('aiBtn');
+  const loading = document.getElementById('aiLoading');
+  const answer = document.getElementById('aiAnswer');
+  const answerText = document.getElementById('aiAnswerText');
+
+  btn.disabled = true;
+  answer.style.display = 'none';
+  loading.style.display = 'block';
+
+  try {
+    const body = { question: q, model: 'qwen-turbo' };
+    if (selectedPetId) body.pet_id = selectedPetId;
+    const res = await api('/api/consult', { method: 'POST', body: JSON.stringify(body) });
+    answerText.textContent = res.answer || 'AI 暂时无法回答，请稍后再试';
+    answer.style.display = 'block';
+  } catch (e) {
+    answerText.textContent = '网络错误，请检查后端服务';
+    answer.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    loading.style.display = 'none';
+  }
+}
+
+// ============ 问诊记录 ============
+async function loadConsultations() {
+  const container = document.getElementById('consultationList');
+  try {
+    const res = await api('/api/consultations?limit=50');
+    if (!Array.isArray(res) || res.length === 0) {
+      container.innerHTML = '<div class="empty-state">暂无问诊记录</div>';
+      return;
+    }
+    container.innerHTML = res.map(c => `
+      <div class="record-card" style="flex-direction:column;align-items:stretch">
+        <div class="record-header">
+          <div class="record-title">${escHtml(c.question.substring(0, 30))}${c.question.length > 30 ? '...' : ''}</div>
+          <div class="record-date">${c.created_at ? c.created_at.substring(0, 10) : ''}</div>
+        </div>
+        <div class="record-desc" style="margin-top:6px">${escHtml(c.answer.substring(0, 100))}...</div>
+      </div>
+    `).join('');
+  } catch (e) {
+    container.innerHTML = '<div class="empty-state">加载失败</div>';
+  }
+}
+
+// ============ 医院 ============
+async function loadHospitals() {
+  const container = document.getElementById('hospitalList');
+  try {
+    const res = await api('/api/hospitals?limit=50');
+    if (!Array.isArray(res) || res.length === 0) {
+      container.innerHTML = '<div class="empty-state">暂无医院数据<br><span style="font-size:12px">医院数据正在录入中</span></div>';
+      document.getElementById('hospitalCount').textContent = '医院数据待录入';
+      return;
+    }
+    document.getElementById('hospitalCount').textContent = `共 ${res.length} 家医院`;
+    container.innerHTML = res.map(h => `
+      <div class="hosp-card">
+        <div class="hosp-left">
+          <div class="hosp-name">${escHtml(h.name)}</div>
+          <div class="hosp-addr">${escHtml(h.address || '')}</div>
+          ${h.distance_km ? `<div class="hosp-dist">📍 ${h.distance_km}km</div>` : ''}
+        </div>
+        <div class="hosp-right">
+          ${h.rating ? `<div class="hosp-rating">⭐ ${h.rating}</div>` : ''}
+          <button class="hosp-btn" onclick="window.open('https://uri.amap.com/marker?position='+(h.longitude||116.4)+','+(h.latitude||39.9)+'&name=${encodeURIComponent(h.name)}')">导航</button>
+        </div>
+      </div>
+    `).join('');
+  } catch (e) {
+    container.innerHTML = '<div class="empty-state">加载失败</div>';
+  }
+}
+
+// ============ 健康档案 ============
+async function loadProfile(petId) {
+  if (!petId) {
+    document.getElementById('profileContent').innerHTML = '<div class="empty-state">请选择宠物</div>';
+    return;
+  }
+  try {
+    const records = await api(`/api/pets/${petId}/records`);
+    const pet = pets.find(p => p.id === petId);
+    let html = '';
+    if (pet) {
+      html += `<div class="profile-card">
+        <div class="pet-name" style="margin-bottom:14px">${escHtml(pet.name)}</div>
+        <div class="profile-row">
+          <div class="profile-item"><div class="label">品种</div><div class="value">${pet.breed || '-'}</div></div>
+          <div class="profile-item"><div class="label">性别</div><div class="value">${pet.gender || '-'}</div></div>
+          <div class="profile-item"><div class="label">体重</div><div class="value">${pet.weight || '-'}kg</div></div>
+        </div>
+      </div>`;
+    }
+    html += '<div class="section-title">医疗记录</div>';
+    if (Array.isArray(records) && records.length > 0) {
+      html += records.map(r => `
+        <div class="record-card">
+          <div class="record-dot"></div>
+          <div class="record-content">
+            <div class="record-header">
+              <div class="record-title">${escHtml(r.title || r.record_type)}</div>
+              <div class="record-date">${r.record_date || ''}</div>
+            </div>
+            <div class="record-desc">${escHtml(r.description || '')}</div>
+            ${r.vet_name ? `<div style="font-size:12px;color:var(--text-light);margin-top:4px">医生：${escHtml(r.vet_name)}</div>` : ''}
+          </div>
+          <span class="record-tag tag-blue">${escHtml(r.record_type)}</span>
+        </div>
+      `).join('');
+    } else {
+      html += '<div class="empty-state">暂无医疗记录</div>';
+    }
+    document.getElementById('profileContent').innerHTML = html;
+  } catch (e) {
+    document.getElementById('profileContent').innerHTML = '<div class="empty-state">加载失败</div>';
+  }
+}
+
+function escHtml(s) {
+  if (!s) return '';
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+// 档案页宠物选择
+function loadProfilePets(containerId) {
+  const container = document.getElementById(containerId);
+  if (pets.length === 0) {
+    container.innerHTML = '';
+    document.getElementById('profileContent').innerHTML = '<div class="empty-state">暂无宠物</div>';
+    return;
+  }
+  container.innerHTML = pets.map(p =>
+    `<span class="pet-chip ${p.id === selectedPetId ? 'selected' : ''}" onclick="selectProfilePet(${p.id})">${p.name}</span>`
+  ).join('');
+  loadProfile(selectedPetId);
+}
+
+function selectProfilePet(id) {
+  selectedPetId = id;
+  loadProfilePets('profilePetSelector');
+}
+
+// 覆盖 loadPetsForSelector 以处理档案页
+const origLoadPetsForSelector = loadPetsForSelector;
+loadPetsForSelector = function(containerId) {
+  if (containerId === 'profilePetSelector') {
+    loadProfilePets(containerId);
+    return;
+  }
+  origLoadPetsForSelector(containerId);
+};
+
+// ============ 初始化 ============
+if (token) {
+  // 尝试自动登录
+  api('/api/pets').then(async res => {
+    if (Array.isArray(res)) {
+      document.getElementById('loginPage').style.display = 'none';
+      document.getElementById('mainApp').style.display = 'flex';
+      pets = res;
+      if (pets.length > 0) selectedPetId = pets[0].id;
+      await loadHomeData();
+    }
+  }).catch(() => {
+    localStorage.removeItem('ahfu_token');
+    token = '';
+  });
+}
+</script>
+</body>
+</html>
